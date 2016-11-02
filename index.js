@@ -58,11 +58,18 @@ const ScrollableTabView = React.createClass({
 
   getInitialState() {
     return {
+      acceptScrollEvents: false,
       currentPage: this.props.initialPage,
       scrollValue: new Animated.Value(this.props.initialPage),
       containerWidth: Dimensions.get('window').width,
       sceneKeys: this.newSceneKeys({ currentPage: this.props.initialPage, }),
     };
+  },
+
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(() => {
+      this.setState({ acceptScrollEvents: true });
+    });
   },
 
   componentWillReceiveProps(props) {
@@ -149,8 +156,10 @@ const ScrollableTabView = React.createClass({
         contentOffset={{ x: this.props.initialPage * this.state.containerWidth, }}
         ref={(scrollView) => { this.scrollView = scrollView; }}
         onScroll={(e) => {
-          const offsetX = e.nativeEvent.contentOffset.x;
-          this._updateScrollValue(offsetX / this.state.containerWidth);
+          if (this.state.acceptScrollEvents) {
+            const offsetX = e.nativeEvent.contentOffset.x;
+            this._updateScrollValue(offsetX / this.state.containerWidth);
+          }
         }}
         onMomentumScrollBegin={this._onMomentumScrollBeginAndEnd}
         onMomentumScrollEnd={this._onMomentumScrollBeginAndEnd}
